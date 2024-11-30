@@ -14,6 +14,7 @@ import (
 const (
 	winTitle        = "Go-SDL2 Texture Example"
 	winWidth, winHeight = 32*25, 32*20
+	baseGroundImagePath = "./assets/image/ground"
 	ourNpcImagePath = "./assets/image/our_npc.png"
 )
 
@@ -37,7 +38,7 @@ type Map struct {
 
 // 새 흙 타일 생성 함수
 func NewDirtTile(renderer *sdl.Renderer) Tile {
-    texture, w, h := loadTexture(renderer, "./assets/image/ground/dirt.png")
+    texture, w, h := loadTexture(renderer, baseGroundImagePath+"/dirt.png")
     return Tile{
         Type:    "dirt", 
         Texture: texture,
@@ -49,7 +50,7 @@ func NewDirtTile(renderer *sdl.Renderer) Tile {
 
 // 새 물 타일 생성 함수
 func NewWaterTile(renderer *sdl.Renderer) Tile {
-    texture, w, h := loadTexture(renderer, "./assets/image/ground/water.png")
+    texture, w, h := loadTexture(renderer, baseGroundImagePath+"/water.png")
     return Tile{
         Type:    "water",
         Texture: texture,
