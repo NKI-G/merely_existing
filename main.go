@@ -19,6 +19,10 @@ const (
 	SCREEN_HEIGHT = 30*32;
 
     OUR_NPC_IMAGE_PATH = "./assets/image/our_npc.png"
+	ScreenMinX = -100    // 화면 왼쪽 경계
+    ScreenMaxX = 1700  // 화면 오른쪽 경계
+    ScreenMinY = -100     // 화면 위쪽 경계
+    ScreenMaxY = 2341  // 화면 아래쪽 경계
 )
 
 var (
@@ -26,7 +30,6 @@ var (
     damping              float32 = 0.9  // 감쇠율
     sensitivity          float32 = 2  // 마우스 민감도
     mouseDragging        bool    = false
-	isWorldOutCamera bool = false
 )
 
 func run() int {
@@ -58,9 +61,9 @@ func run() int {
 	texture := utility.RenderText(renderer, font, text, color)
 	defer texture.Destroy()
 
-	_, _, width, height, err := texture.Query()
+	//_, _, width, height, err := texture.Query()
 	utility.CheckError(err, "Failed to query texture")
-	dstRect := sdl.Rect{X: 100, Y: 100, W: int32(width), H: int32(height)}
+	//dstRect := sdl.Rect{X: 100, Y: 100, W: int32(width), H: int32(height)}
 
 	camera := c.NewCamera(0, 0, renderer)
 
@@ -80,7 +83,6 @@ func run() int {
 
     prevMouseX, prevMouseY := int32(0), int32(0) // 이전 마우스 위치 저장
 
-	// 이벤트 루프
 	running := true
 	for running {
 		// 이벤트 처리
@@ -95,19 +97,39 @@ func run() int {
 			case *sdl.MouseMotionEvent: // 마우스 이동 이벤트
 				if e.State == 1 { // 왼쪽 버튼이 눌려진 상태
 					mouseDragging = true
-		
+
 					// 마우스 이동량 계산 (민감도 적용)
 					deltaX := float32(e.X-prevMouseX) * sensitivity
 					deltaY := float32(e.Y-prevMouseY) * sensitivity
-		
+
 					// 속도 업데이트
 					velocityX = deltaX
 					velocityY = deltaY
-		
-					// 카메라 위치 갱신
-					camera.XPos -= int32(deltaX)
-					camera.YPos -= int32(deltaY)
-		
+
+					// 카메라 위치 갱신 (경계 제한 포함)
+					newX := camera.XPos - int32(deltaX)
+					newY := camera.YPos - int32(deltaY)
+
+					if newX < ScreenMinX {
+						camera.XPos = ScreenMinX
+						velocityX = 0
+					} else if newX > ScreenMaxX {
+						camera.XPos = ScreenMaxX
+						velocityX = 0
+					} else {
+						camera.XPos = newX
+					}
+
+					if newY < ScreenMinY {
+						camera.YPos = ScreenMinY
+						velocityY = 0
+					} else if newY > ScreenMaxY {
+						camera.YPos = ScreenMaxY
+						velocityY = 0
+					} else {
+						camera.YPos = newY
+					}
+
 					// 현재 마우스 위치를 저장
 					prevMouseX, prevMouseY = e.X, e.Y
 				}
@@ -121,17 +143,37 @@ func run() int {
 				}
 			}
 		}
-		
+
 		// 관성 처리
 		if !mouseDragging {
-			// 카메라 위치를 속도에 따라 업데이트
-			camera.XPos -= int32(velocityX)
-			camera.YPos -= int32(velocityY)
-		
+			// 카메라 위치를 속도에 따라 업데이트 (경계 제한 포함)
+			newX := camera.XPos - int32(velocityX)
+			newY := camera.YPos - int32(velocityY)
+
+			if newX < ScreenMinX {
+				camera.XPos = ScreenMinX
+				velocityX = 0
+			} else if newX > ScreenMaxX {
+				camera.XPos = ScreenMaxX
+				velocityX = 0
+			} else {
+				camera.XPos = newX
+			}
+
+			if newY < ScreenMinY {
+				camera.YPos = ScreenMinY
+				velocityY = 0
+			} else if newY > ScreenMaxY {
+				camera.YPos = ScreenMaxY
+				velocityY = 0
+			} else {
+				camera.YPos = newY
+			}
+
 			// 속도 감쇠
 			velocityX *= damping
 			velocityY *= damping
-		
+
 			// 일정 임계값 이하로 줄어들면 속도를 0으로 설정
 			if velocityX < 0.1 && velocityX > -0.1 {
 				velocityX = 0
@@ -146,31 +188,10 @@ func run() int {
 
 		camera.MapDraw(groundMap)
 
-		if camera.XPos < -100 {
-			camera.XPos += 10
-			renderer.Copy(texture, nil, &dstRect)
-			
-		}
-		if camera.YPos < -100 {
-			camera.YPos += 10
-			renderer.Copy(texture, nil, &dstRect)
-		}
-
-		if camera.XPos > 1600+100 {
-			camera.XPos -= 10
-			renderer.Copy(texture, nil, &dstRect)
-			
-		}
-		if camera.YPos > 2241+100 {
-			camera.YPos -= 10
-			renderer.Copy(texture, nil, &dstRect)
-		}
-		println(camera.XPos, camera.YPos, isWorldOutCamera)
-
 		// 화면 그리기
-
 		renderer.Present() // 화면에 렌더링
 	}
+
 
 	return 0
 }
