@@ -16,7 +16,7 @@ type MapGenerator struct {
 }
 
 const (
-	waterFrequency = 200 // 높을수록 적음
+	waterFrequency = 1100 // 높을수록 적음
 )
 
 // NewMapGenerator는 MapGenerator를 초기화하는 공개 함수입니다.

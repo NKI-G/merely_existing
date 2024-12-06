@@ -55,16 +55,6 @@ func run() int {
 	font := utility.LoadFont("assets/Galmuri11.ttf", 24)
 	defer font.Close()
 
-	// 텍스트 렌더링
-	text := "기다리면 화면이 돌아올거에요."
-	color := sdl.Color{R: 255, G: 255, B: 255, A: 255}
-	texture := utility.RenderText(renderer, font, text, color)
-	defer texture.Destroy()
-
-	//_, _, width, height, err := texture.Query()
-	utility.CheckError(err, "Failed to query texture")
-	//dstRect := sdl.Rect{X: 100, Y: 100, W: int32(width), H: int32(height)}
-
 	camera := c.NewCamera(0, 0, renderer)
 
 	//resourceRatios := map[string]float64{
